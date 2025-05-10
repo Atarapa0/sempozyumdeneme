@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware, roleMiddleware } from '@/lib/auth-middleware';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { existsSync } from 'fs';
+import { supabase } from '@/lib/supabase';
 
 // Arşiv Dosyası Yükleme Endpoint'i
 export async function POST(request: NextRequest) {
@@ -63,10 +61,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Dosyayı oku
-    const bytes = await file.arrayBuffer();
-    const buffer = new Uint8Array(bytes);
-
     // Dosya adını temizle ve benzersiz bir isim oluştur
     const originalFilename = file.name;
     
@@ -90,49 +84,62 @@ export async function POST(request: NextRequest) {
     
     const uniqueFilename = `${Date.now()}-${safeFilename}`;
 
-    // Yükleme dizinini ayarla
-    let uploadSubDir = fileType === 'cover' ? 'kapak' : 'pdf';
-    const uploadDir = path.join(process.cwd(), 'public', 'arsiv', uploadSubDir);
-    const filePath = path.join(uploadDir, uniqueFilename);
+    // Yükleme alt dizini ayarla
+    const uploadSubDir = fileType === 'cover' ? 'kapak' : 'pdf';
     
-    // Dizin yapısını oluştur
+    // Supabase Storage'a yükleme yapacak bucket ve yol
+    const bucketName = 'arsiv';
+    const filePath = `${uploadSubDir}/${uniqueFilename}`;
+    
     try {
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true });
+      // Bucket'ın varlığını kontrol et, yoksa oluştur
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+      
+      if (!bucketExists) {
+        await supabase.storage.createBucket(bucketName, {
+          public: true,
+          fileSizeLimit: MAX_FILE_SIZE,
+        });
       }
-    } catch (err) {
-      console.error('Dizin oluşturma hatası:', err);
+      
+      // Dosyayı Supabase'e yükle
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Dosyanın public URL'sini al
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Dosya başarıyla yüklendi',
+        url: publicUrl,
+        fileInfo: {
+          originalName: originalFilename,
+          filename: uniqueFilename,
+          type: file.type,
+          size: file.size,
+          path: filePath
+        }
+      }, { status: 201 });
+      
+    } catch (error: any) {
+      console.error('Supabase Storage yükleme hatası:', error);
       return NextResponse.json(
-        { error: 'Dosya yükleme dizini oluşturulamadı', detay: err instanceof Error ? err.message : 'Bilinmeyen hata' },
+        { success: false, error: 'Dosya yüklenirken bir hata oluştu', detay: error.message },
         { status: 500 }
       );
     }
-
-    // Dosyayı yaz
-    try {
-      await writeFile(filePath, buffer);
-    } catch (err) {
-      console.error('Dosya yazma hatası:', err);
-      return NextResponse.json(
-        { error: 'Dosya kaydedilemedi', detay: err instanceof Error ? err.message : 'Bilinmeyen hata' },
-        { status: 500 }
-      );
-    }
-
-    // Erişim URL'si oluştur (public path)
-    const fileUrl = `/arsiv/${uploadSubDir}/${uniqueFilename}`;
-
-    return NextResponse.json({
-      success: true,
-      message: 'Dosya başarıyla yüklendi',
-      url: fileUrl,
-      fileInfo: {
-        originalName: originalFilename,
-        filename: uniqueFilename,
-        type: file.type,
-        size: file.size
-      }
-    }, { status: 201 });
     
   } catch (error: any) {
     console.error('Dosya yükleme hatası:', error);

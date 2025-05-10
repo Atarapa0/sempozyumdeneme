@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware } from '@/lib/auth-middleware';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 // Bildiri Dosyası Yükleme Endpoint'i
 export async function POST(request: NextRequest) {
@@ -62,10 +61,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Dosyayı oku
-    const bytes = await file.arrayBuffer();
-    const buffer = new Uint8Array(bytes);
-
     // Dosya adını temizle ve benzersiz bir isim oluştur
     const originalFilename = file.name;
     
@@ -89,45 +84,57 @@ export async function POST(request: NextRequest) {
     
     const uniqueFilename = `${Date.now()}-${safeFilename}`;
 
-    // Yükleme dizinini ayarla
-    const uploadDir = path.join(process.cwd(), 'public', 'bildiriler', activeSempozyum.title.replace(/\s+/g, '-').toLowerCase());
-    const filePath = path.join(uploadDir, uniqueFilename);
-    
-    // Dizin yapısını oluştur
+    // Yükleme için Supabase bucket ve yol bilgileri
+    const bucketName = 'bildiriler';
+    const folderName = activeSempozyum.title.replace(/\s+/g, '-').toLowerCase();
+    const filePath = `${folderName}/${uniqueFilename}`;
+
     try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (err) {
-      console.error('Dizin oluşturma hatası:', err);
-      return NextResponse.json(
-        { error: 'Dosya yükleme dizini oluşturulamadı', detay: err instanceof Error ? err.message : 'Bilinmeyen hata' },
-        { status: 500 }
-      );
-    }
-
-    // Dosyayı yaz
-    try {
-      await writeFile(filePath, buffer);
-    } catch (err) {
-      console.error('Dosya yazma hatası:', err);
-      return NextResponse.json(
-        { error: 'Dosya kaydedilemedi', detay: err instanceof Error ? err.message : 'Bilinmeyen hata' },
-        { status: 500 }
-      );
-    }
-
-    // Erişim URL'si oluştur (public path)
-    const fileUrl = `/bildiriler/${activeSempozyum.title.replace(/\s+/g, '-').toLowerCase()}/${uniqueFilename}`;
-
-    return NextResponse.json({
-      message: 'Bildiri dosyası başarıyla yüklendi',
-      fileInfo: {
-        originalName: originalFilename,
-        filename: uniqueFilename,
-        type: file.type,
-        size: file.size,
-        url: fileUrl
+      // Bucket'ın varlığını kontrol et, yoksa oluştur
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
+      
+      if (!bucketExists) {
+        await supabase.storage.createBucket(bucketName, {
+          public: true,
+          fileSizeLimit: MAX_FILE_SIZE,
+        });
       }
-    }, { status: 201 });
+      
+      // Dosyayı Supabase'e yükle
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Dosyanın public URL'sini al
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath);
+
+      return NextResponse.json({
+        message: 'Bildiri dosyası başarıyla yüklendi',
+        fileInfo: {
+          originalName: originalFilename,
+          filename: uniqueFilename,
+          type: file.type,
+          size: file.size,
+          url: publicUrl
+        }
+      }, { status: 201 });
+    } catch (uploadError) {
+      console.error('Supabase yükleme hatası:', uploadError);
+      return NextResponse.json(
+        { error: 'Dosya yüklenemedi', detay: (uploadError as Error).message },
+        { status: 500 }
+      );
+    }
   } catch (error: any) {
     console.error('Bildiri dosyası yükleme hatası:', error);
     return NextResponse.json(
