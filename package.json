@@ -11,7 +11,7 @@
     "lint": "next lint",
     "clean": "rm -rf .next",
     "deploy-db": "node scripts/deploy-db.js",
-    "vercel-build": "prisma generate && prisma db push && next build"
+    "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
