@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -37,7 +37,7 @@ model Kullanici {
   bildiriler         Bildiri[]
   rol                Rol       @relation(fields: [rolId], references: [id])
 
-  @@index([rolId], map: "Kullanici_rolId_fkey")
+  @@index([rolId])
 }
 
 model Sempozyum {
@@ -78,7 +78,7 @@ model GenelBilgiler {
   updatedAt            DateTime  @updatedAt
   sempozyum            Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([sempozyumId], map: "GenelBilgiler_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model OnemliTarihler {
@@ -91,7 +91,7 @@ model OnemliTarihler {
   updatedAt   DateTime  @updatedAt
   sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([sempozyumId], map: "OnemliTarihler_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model AnaKonu {
@@ -105,7 +105,7 @@ model AnaKonu {
   bildiriler      Bildiri[]
   bildiriKonulari BildiriKonusu[]
 
-  @@index([sempozyumId], map: "AnaKonu_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model Sponsor {
@@ -118,7 +118,7 @@ model Sponsor {
   updatedAt   DateTime  @updatedAt
   sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([sempozyumId], map: "Sponsor_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model Dergi {
@@ -133,7 +133,7 @@ model Dergi {
   updatedAt      DateTime  @updatedAt
   sempozyum      Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([sempozyumId], map: "Dergi_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model Komite {
@@ -148,7 +148,7 @@ model Komite {
   updatedAt   DateTime  @updatedAt
   sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([sempozyumId], map: "Komite_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model Program {
@@ -167,7 +167,7 @@ model Program {
   updatedAt     DateTime  @updatedAt
   sempozyum     Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([sempozyumId], map: "Program_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model BildiriKonusu {
@@ -182,8 +182,8 @@ model BildiriKonusu {
   anaKonu     AnaKonu   @relation(fields: [anaKonuId], references: [id])
   sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([anaKonuId], map: "BildiriKonusu_anaKonuId_fkey")
-  @@index([sempozyumId], map: "BildiriKonusu_sempozyumId_fkey")
+  @@index([anaKonuId])
+  @@index([sempozyumId])
 }
 
 model Bildiri {
@@ -215,10 +215,10 @@ model Bildiri {
   sempozyum          Sempozyum     @relation(fields: [sempozyumId], references: [id])
   revizeler          Revize[]
 
-  @@index([anaKonuId], map: "Bildiri_anaKonuId_fkey")
-  @@index([bildiriKonusuId], map: "Bildiri_bildiriKonusuId_fkey")
-  @@index([kullaniciId], map: "Bildiri_kullaniciId_fkey")
-  @@index([sempozyumId], map: "Bildiri_sempozyumId_fkey")
+  @@index([anaKonuId])
+  @@index([bildiriKonusuId])
+  @@index([kullaniciId])
+  @@index([sempozyumId])
 }
 
 model Revize {
@@ -249,8 +249,8 @@ model Revize {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  @@index([bildiriId], map: "Revize_bildiriId_fkey")
-  @@index([sempozyumId], map: "Revize_sempozyumId_fkey")
+  @@index([bildiriId])
+  @@index([sempozyumId])
 }
 
 model RevizeGecmisi {
@@ -284,8 +284,8 @@ model RevizeGecmisi {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  @@index([bildiriId], map: "RevizeGecmisi_bildiriId_fkey")
-  @@index([sempozyumId], map: "RevizeGecmisi_sempozyumId_fkey")
+  @@index([bildiriId])
+  @@index([sempozyumId])
 }
 
 model Iletisim {
@@ -309,7 +309,7 @@ model Arsiv {
   updatedAt      DateTime  @updatedAt
   sempozyum      Sempozyum @relation(fields: [sempozyumId], references: [id])
 
-  @@index([sempozyumId], map: "Arsiv_sempozyumId_fkey")
+  @@index([sempozyumId])
 }
 
 model SifreSifirlama {
