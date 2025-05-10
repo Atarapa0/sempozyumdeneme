@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
         console.error('Supabase upload hatası:', error);
         
         // Bucket bulunamadı hatası (manuel oluşturulması gerekiyor)
-        if (error.statusCode === '404' && error.message === 'Bucket not found') {
+        if (error.status === 404 && error.message === 'Bucket not found') {
           return NextResponse.json(
             { 
               success: false, 
