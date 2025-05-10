@@ -1,0 +1,18 @@
+[
+  {
+    "id": "başkan",
+    "name": "Başkan"
+  },
+  {
+    "id": "üye",
+    "name": "Üye"
+  },
+  {
+    "id": "başkan-yardımcısı",
+    "name": "Başkan Yardımcısı"
+  },
+  {
+    "id": "sekreter",
+    "name": "Sekreter"
+  }
+] 

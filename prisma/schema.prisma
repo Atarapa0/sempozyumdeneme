@@ -1,0 +1,322 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Rol {
+  id           Int         @id @default(autoincrement())
+  ad           String      @unique
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  kullanicilar Kullanici[]
+}
+
+model Kullanici {
+  id                 Int       @id @default(autoincrement())
+  ad                 String
+  soyad              String
+  unvan              String
+  universite         String
+  kongreKatilimSekli String
+  kurum              String
+  fakulte            String?
+  bolum              String?
+  yazismaAdresi      String?
+  kurumTel           String?
+  cepTel             String
+  eposta             String    @unique
+  sifre              String
+  rolId              Int
+  hakem_yetenekleri  Json?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  bildiriler         Bildiri[]
+  rol                Rol       @relation(fields: [rolId], references: [id])
+
+  @@index([rolId], map: "Kullanici_rolId_fkey")
+}
+
+model Sempozyum {
+  id              Int              @id @default(autoincrement())
+  title           String
+  aktiflik        Boolean          @default(true)
+  tarih           DateTime
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  anaKonular      AnaKonu[]
+  arsivler        Arsiv[]
+  bildiriler      Bildiri[]
+  bildiriKonulari BildiriKonusu[]
+  dergiler        Dergi[]
+  genelBilgiler   GenelBilgiler[]
+  komiteler       Komite[]
+  onemliTarihler  OnemliTarihler[]
+  programlar      Program[]
+  revizeler       Revize[]
+  revizeGecmisi   RevizeGecmisi[]
+  sponsorlar      Sponsor[]
+}
+
+model GenelBilgiler {
+  id                   Int       @id @default(autoincrement())
+  sempozyumId          Int
+  title                String
+  altbaslik            String
+  tariharaligi         String
+  geriSayimBitimTarihi DateTime
+  yer                  String
+  organizator          String
+  kisaaciklama         String    @db.Text
+  uzunaciklama         String    @db.Text
+  docentlikbilgisi     String?   @db.Text
+  yil                  Int
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  sempozyum            Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([sempozyumId], map: "GenelBilgiler_sempozyumId_fkey")
+}
+
+model OnemliTarihler {
+  id          Int       @id @default(autoincrement())
+  sempozyumId Int
+  baslik      String
+  tarih       DateTime
+  durum       Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([sempozyumId], map: "OnemliTarihler_sempozyumId_fkey")
+}
+
+model AnaKonu {
+  id              Int             @id @default(autoincrement())
+  sempozyumId     Int
+  baslik          String
+  aciklama        String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  sempozyum       Sempozyum       @relation(fields: [sempozyumId], references: [id])
+  bildiriler      Bildiri[]
+  bildiriKonulari BildiriKonusu[]
+
+  @@index([sempozyumId], map: "AnaKonu_sempozyumId_fkey")
+}
+
+model Sponsor {
+  id          Int       @id @default(autoincrement())
+  sempozyumId Int
+  ad          String
+  logoUrl     String
+  link        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([sempozyumId], map: "Sponsor_sempozyumId_fkey")
+}
+
+model Dergi {
+  id             Int       @id @default(autoincrement())
+  sempozyumId    Int
+  ad             String
+  aciklama       String
+  yayinTarihi    DateTime
+  kapakGorselUrl String?
+  pdfDosya       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  sempozyum      Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([sempozyumId], map: "Dergi_sempozyumId_fkey")
+}
+
+model Komite {
+  id          Int       @id @default(autoincrement())
+  sempozyumId Int
+  unvan       String?
+  ad          String
+  soyad       String
+  kurum       String?
+  komiteTur   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([sempozyumId], map: "Komite_sempozyumId_fkey")
+}
+
+model Program {
+  id            Int       @id @default(autoincrement())
+  sempozyumId   Int
+  gun           String
+  basTarih      String
+  bitTarih      String
+  title         String
+  konusmaci     String?
+  lokasyon      String
+  tip           String
+  aciklama      String?   @db.Text
+  oturumBaskani String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sempozyum     Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([sempozyumId], map: "Program_sempozyumId_fkey")
+}
+
+model BildiriKonusu {
+  id          Int       @id @default(autoincrement())
+  sempozyumId Int
+  anaKonuId   Int
+  baslik      String
+  aciklama    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  bildiriler  Bildiri[]
+  anaKonu     AnaKonu   @relation(fields: [anaKonuId], references: [id])
+  sempozyum   Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([anaKonuId], map: "BildiriKonusu_anaKonuId_fkey")
+  @@index([sempozyumId], map: "BildiriKonusu_sempozyumId_fkey")
+}
+
+model Bildiri {
+  id                 Int           @id @default(autoincrement())
+  sempozyumId        Int
+  baslik             String
+  baslikEn           String
+  ozet               String        @db.Text
+  ozetEn             String        @db.Text
+  yazarlar           Json
+  anahtarKelimeler   Json
+  anahtarKelimelerEn Json
+  sunumTipi          String
+  sunumYeri          String?
+  kongreyeMesaj      String?       @db.Text
+  intihalPosterDosya String?
+  anaKonuId          Int
+  bildiriKonusuId    Int
+  dokuman            String?
+  kullaniciId        Int
+  durum              String        @default("beklemede")
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  hakemler           Json?
+  hakemDurumlari     Json?         // Hakemlerin bildiri değerlendirme durumlarını takip etmek için
+  anaKonu            AnaKonu       @relation(fields: [anaKonuId], references: [id])
+  bildiriKonusu      BildiriKonusu @relation(fields: [bildiriKonusuId], references: [id])
+  kullanici          Kullanici     @relation(fields: [kullaniciId], references: [id])
+  sempozyum          Sempozyum     @relation(fields: [sempozyumId], references: [id])
+  revizeler          Revize[]
+
+  @@index([anaKonuId], map: "Bildiri_anaKonuId_fkey")
+  @@index([bildiriKonusuId], map: "Bildiri_bildiriKonusuId_fkey")
+  @@index([kullaniciId], map: "Bildiri_kullaniciId_fkey")
+  @@index([sempozyumId], map: "Bildiri_sempozyumId_fkey")
+}
+
+model Revize {
+  id              Int          @id @default(autoincrement())
+  sempozyumId     Int
+  durum           String       
+  bildiriId       Int
+  hakemId         Int?         // Added hakemId field
+  gucluYonler     String?      @db.Text
+  zayifYonler     String?      @db.Text
+  genelYorum      String?      @db.Text
+  guvenSeviyesi   Int?         // 1-5 arası değer
+  
+  // Yeni eklenen makale değerlendirme alanları (max 50 karakter)
+  makaleTuru                 String?    @db.Text
+  makaleBasligi              String?    @db.Text
+  soyut                      String?    @db.Text
+  anahtarKelimeler           String?    @db.Text
+  giris                      String?    @db.Text
+  gerekcelerVeYontemler      String?    @db.Text
+  sonuclarVeTartismalar      String?    @db.Text
+  referanslar                String?    @db.Text
+  guncellikVeOzgunluk        String?    @db.Text
+  
+  sempozyum       Sempozyum    @relation(fields: [sempozyumId], references: [id])
+  bildiri         Bildiri      @relation(fields: [bildiriId], references: [id])
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([bildiriId], map: "Revize_bildiriId_fkey")
+  @@index([sempozyumId], map: "Revize_sempozyumId_fkey")
+}
+
+model RevizeGecmisi {
+  id              Int          @id @default(autoincrement())
+  sempozyumId     Int
+  durum           String       
+  bildiriId       Int
+  hakemId         Int?
+  gucluYonler     String?      @db.Text
+  zayifYonler     String?      @db.Text
+  genelYorum      String?      @db.Text
+  guvenSeviyesi   Int?
+  
+  // Makale değerlendirme alanları
+  makaleTuru                 String?    @db.Text
+  makaleBasligi              String?    @db.Text
+  soyut                      String?    @db.Text
+  anahtarKelimeler           String?    @db.Text
+  giris                      String?    @db.Text
+  gerekcelerVeYontemler      String?    @db.Text
+  sonuclarVeTartismalar      String?    @db.Text
+  referanslar                String?    @db.Text
+  guncellikVeOzgunluk        String?    @db.Text
+  
+  // Sempozyum ile ilişki
+  sempozyum       Sempozyum    @relation(fields: [sempozyumId], references: [id])
+  
+  // Orijinal Revize kaydından bilgiler
+  revizeTarihi    DateTime     @default(now())
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([bildiriId], map: "RevizeGecmisi_bildiriId_fkey")
+  @@index([sempozyumId], map: "RevizeGecmisi_sempozyumId_fkey")
+}
+
+model Iletisim {
+  id        Int      @id @default(autoincrement())
+  adSoyad   String
+  eposta    String
+  konu      String
+  mesaj     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Arsiv {
+  id             Int       @id @default(autoincrement())
+  sempozyumId    Int
+  ad             String
+  aciklama       String    @db.Text
+  kapakGorselUrl String?
+  pdfDosya       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  sempozyum      Sempozyum @relation(fields: [sempozyumId], references: [id])
+
+  @@index([sempozyumId], map: "Arsiv_sempozyumId_fkey")
+}
+
+model SifreSifirlama {
+  id          Int      @id @default(autoincrement())
+  kullaniciId Int      @unique
+  token       String   @unique
+  sonTarih    DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "prof-dr",
+    "name": "Prof. Dr."
+  },
+  {
+    "id": "doc-dr",
+    "name": "Doç. Dr."
+  },
+  {
+    "id": "dr-ogr-uyesi",
+    "name": "Dr. Öğr. Üyesi"
+  },
+  {
+    "id": "ogr-gor",
+    "name": "Öğr. Gör."
+  },
+  {
+    "id": "ars-gor",
+    "name": "Arş. Gör."
+  },
+  {
+    "id": "dr",
+    "name": "Dr."
+  },
+  {
+    "id": "prof",
+    "name": "Prof."
+  },
+  {
+    "id": "doc",
+    "name": "Doç."
+  }
+] 

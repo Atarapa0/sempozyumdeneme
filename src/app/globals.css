@@ -1,0 +1,224 @@
+/* 
+  tailwindcss directives 
+  IDE may show warnings but they work correctly in the build process
+  These are required for Tailwind CSS to work properly
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+  
+  /* Ana renkler */
+  --primary-color: #1d4ed8; /* Koyu mavi - bg-blue-700 */
+  --primary-light: #3b82f6; /* Orta mavi - bg-blue-500 */
+  --primary-dark: #1e40af; /* Çok koyu mavi - bg-blue-800 */
+
+  /* Sayfa yapısı renkleri */
+  --page-background: #ffffff; /* Ana sayfa arka planı - beyaz */
+  --section-background: #f8fafc; /* Bölüm arka planı - slate-50 */
+  --card-background: #ffffff; /* Kart arka planı - beyaz */
+  --border-light: #e2e8f0; /* Açık kenarlık - slate-200 */
+  --border-medium: #cbd5e1; /* Orta kenarlık - slate-300 */
+
+  /* Metin renkleri */
+  --text-light: #f8fafc; /* Açık metin - slate-50 */
+  --text-dark: #1e293b; /* Koyu metin - slate-800 */
+  --text-muted: #64748b; /* Soluk metin - slate-500 */
+  --text-primary: #1d4ed8; /* Birincil metin - blue-700 */
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Temel sayfa stilleri */
+body {
+  font-family: system-ui, sans-serif;
+  background-color: var(--page-background);
+  color: var(--text-dark);
+}
+
+/* Başlıklar için varsayılan stiller */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-dark);
+}
+
+/* Paragraflar için varsayılan stiller */
+p {
+  color: var(--text-dark);
+}
+
+/* Mühendislik temalı mavi renk sınıfları */
+.bg-engineering-blue {
+  /* @apply bg-blue-700; */
+  background-color: #1d4ed8; /* bg-blue-700 */
+}
+
+.bg-engineering-light {
+  /* @apply bg-blue-50; */
+  background-color: #eff6ff; /* bg-blue-50 */
+}
+
+.text-engineering-blue {
+  /* @apply text-blue-700; */
+  color: #1d4ed8; /* text-blue-700 */
+}
+
+.border-engineering-blue {
+  /* @apply border-blue-700; */
+  border-color: #1d4ed8; /* border-blue-700 */
+}
+
+.hover-engineering-blue:hover {
+  /* @apply bg-blue-800; */
+  background-color: #1e40af; /* bg-blue-800 */
+}
+
+.hover-engineering-light:hover {
+  /* @apply bg-blue-100; */
+  background-color: #dbeafe; /* bg-blue-100 */
+}
+
+/* Resim yükleme hatası için yedek stil */
+.image-fallback {
+  /* @apply bg-gradient-to-r from-blue-600 to-blue-800; */
+  background-image: linear-gradient(to right, #2563eb, #1e40af); /* from-blue-600 to-blue-800 */
+}
+
+/* Önemli tarihler bölümü için özel stiller */
+.date-item h3 {
+  /* @apply text-gray-900; */
+  color: #111827; /* text-gray-900 */
+}
+
+.date-item span {
+  /* @apply text-white; */
+  color: white;
+}
+
+/* Geri sayım için stiller */
+.countdown-container {
+  /* @apply flex justify-center gap-4 md:gap-8 my-8; */
+  display: flex;
+  justify-content: center;
+  gap: 1rem; /* gap-4 */
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.countdown-item {
+  /* @apply flex flex-col items-center; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.countdown-value {
+  /* @apply text-3xl md:text-5xl font-bold text-blue-700; */
+  font-size: 1.875rem; /* text-3xl */
+  line-height: 2.25rem;
+  font-weight: 700;
+  color: #1d4ed8; /* text-blue-700 */
+}
+
+.countdown-label {
+  /* @apply text-sm md:text-base text-gray-700 mt-1; */
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+  color: #374151; /* text-gray-700 */
+  margin-top: 0.25rem;
+}
+
+@layer components {
+  /* Sayfa yapısı sınıfları */
+  .page-container {
+    @apply min-h-screen;
+    background-color: var(--page-background);
+  }
+
+  .section-container {
+    @apply py-8 px-4;
+    background-color: var(--section-background);
+  }
+
+  .card {
+    @apply rounded-lg shadow-md p-6;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+  }
+
+  /* İçerik bölümü stilleri */
+  .content-section {
+    @apply max-w-4xl mx-auto py-8 px-4;
+    background-color: var(--page-background);
+  }
+
+  .content-card {
+    @apply rounded-lg p-6 mb-6;
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+  }
+
+  /* Başlık stilleri */
+  .page-title {
+    @apply text-3xl font-bold mb-6;
+    color: var(--text-dark);
+  }
+
+  .section-title {
+    @apply text-2xl font-bold mb-4;
+    color: var(--text-dark);
+  }
+
+  /* Metin stilleri */
+  .text-content {
+    @apply leading-relaxed mb-4;
+    color: var(--text-dark);
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+  }
+
+  /* Liste stilleri */
+  .list-item {
+    @apply mb-2 pl-4 border-l-4;
+    border-color: var(--border-light);
+  }
+
+  .list-item:hover {
+    border-color: var(--primary-color);
+  }
+
+  /* Buton stilleri */
+  .btn-primary {
+    @apply px-4 py-2 rounded-md transition duration-200;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--primary-dark);
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 rounded-md transition duration-200;
+    background-color: var(--section-background);
+    color: var(--text-primary);
+    border: 1px solid var(--border-medium);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--border-light);
+  }
+}
