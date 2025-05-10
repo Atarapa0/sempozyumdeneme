@@ -27,6 +27,12 @@ const nextConfig = {
       test: /react-icons/,
       loader: 'ignore-loader',
     });
+    
+    config.experiments = {
+      ...config.experiments,
+      topLevelAwait: true,
+    };
+    
     return config;
   },
   env: {
@@ -35,7 +41,8 @@ const nextConfig = {
   },
   // API zaman aşımı sorunlarını önlemek için
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
+    serverComponentsExternalPackages: ['@prisma/client', 'bcrypt'],
+    externalDir: true,
   },
 };
 
