@@ -92,26 +92,30 @@ export async function POST(request: NextRequest) {
     const filePath = `${uploadSubDir}/${uniqueFilename}`;
     
     try {
-      // Bucket'ın varlığını kontrol et, yoksa oluştur
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-      
-      if (!bucketExists) {
-        await supabase.storage.createBucket(bucketName, {
-          public: true,
-          fileSizeLimit: MAX_FILE_SIZE,
-        });
-      }
-      
-      // Dosyayı Supabase'e yükle
+      // NOT: Bucket'ı manuel olarak Supabase Dashboard'dan oluşturmanız gerekiyor
+      // Bucket'a doğrudan upload yapmayı deneyin
       const { data, error } = await supabase.storage
         .from(bucketName)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true, // Dosya zaten varsa üzerine yaz
         });
       
       if (error) {
+        console.error('Supabase upload hatası:', error);
+        
+        // Bucket bulunamadı hatası (manuel oluşturulması gerekiyor)
+        if (error.statusCode === '404' && error.message === 'Bucket not found') {
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: 'Depolama alanı (bucket) bulunamadı', 
+              detay: 'Lütfen Supabase Dashboard\'dan "arsiv" adlı bir bucket oluşturun ve public erişim izni verin.' 
+            },
+            { status: 404 }
+          );
+        }
+        
         throw error;
       }
       
@@ -136,7 +140,12 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
       console.error('Supabase Storage yükleme hatası:', error);
       return NextResponse.json(
-        { success: false, error: 'Dosya yüklenirken bir hata oluştu', detay: error.message },
+        { 
+          success: false, 
+          error: 'Dosya yüklenirken bir hata oluştu', 
+          detay: error.message || 'Bilinmeyen bir hata oluştu',
+          code: error.code || error.statusCode
+        },
         { status: 500 }
       );
     }
@@ -144,7 +153,11 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Dosya yükleme hatası:', error);
     return NextResponse.json(
-      { success: false, error: 'Dosya yüklenirken bir hata oluştu', detay: error.message },
+      { 
+        success: false, 
+        error: 'Dosya yüklenirken bir hata oluştu', 
+        detay: error.message || 'Bilinmeyen bir hata oluştu' 
+      },
       { status: 500 }
     );
   }

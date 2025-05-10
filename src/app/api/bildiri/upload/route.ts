@@ -90,26 +90,32 @@ export async function POST(request: NextRequest) {
     const filePath = `${folderName}/${uniqueFilename}`;
 
     try {
-      // Bucket'ın varlığını kontrol et, yoksa oluştur
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-      
-      if (!bucketExists) {
-        await supabase.storage.createBucket(bucketName, {
-          public: true,
-          fileSizeLimit: MAX_FILE_SIZE,
-        });
-      }
+      // NOT: Bucket'ı manuel olarak Supabase Dashboard'dan oluşturmanız gerekiyor
+      console.log('Dosyayı Supabase\'e yüklemeye çalışıyorum:', bucketName, filePath);
       
       // Dosyayı Supabase'e yükle
       const { data, error } = await supabase.storage
         .from(bucketName)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true, // Dosya zaten varsa üzerine yaz
         });
       
       if (error) {
+        console.error('Supabase upload hatası:', error);
+        
+        // Bucket bulunamadı hatası (manuel oluşturulması gerekiyor)
+        if (error.statusCode === '404' && error.message === 'Bucket not found') {
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: 'Depolama alanı (bucket) bulunamadı', 
+              detay: 'Lütfen Supabase Dashboard\'dan "bildiriler" adlı bir bucket oluşturun ve public erişim izni verin.' 
+            },
+            { status: 404 }
+          );
+        }
+        
         throw error;
       }
       
@@ -128,10 +134,14 @@ export async function POST(request: NextRequest) {
           url: publicUrl
         }
       }, { status: 201 });
-    } catch (uploadError) {
+    } catch (uploadError: any) {
       console.error('Supabase yükleme hatası:', uploadError);
       return NextResponse.json(
-        { error: 'Dosya yüklenemedi', detay: (uploadError as Error).message },
+        { 
+          error: 'Dosya yüklenemedi', 
+          detay: uploadError.message || 'Bilinmeyen bir hata',
+          code: uploadError.code || uploadError.statusCode 
+        },
         { status: 500 }
       );
     }
