@@ -1,10 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 
-// PrismaClient'ın tek bir instance'ını oluşturun ve global olarak saklayın
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+// PrismaClient'ı global olarak saklamak için tip tanımı
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
-export const prisma = globalForPrisma.prisma || new PrismaClient();
+// Geliştirme ortamında gereksiz bağlantıları önlemek için global nesneyi kullanıyoruz
+const prisma = global.prisma || new PrismaClient();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
+}
 
 export default prisma;
