@@ -143,15 +143,12 @@ API endpoint'leri `/api` dizini altında bulunmaktadır. Her endpoint için deta
 4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
 5. Pull Request oluşturun
 
-## 📄 Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
 ## 📞 İletişim
 
-Proje Sahibi - [@yourusername](https://github.com/yourusername)
+Proje Sahibi - [@yourusername](https://github.com/Atarapa0)
 
-Proje Linki: [https://github.com/yourusername/sempozyum](https://github.com/yourusername/sempozyum)
+Proje Linki: [https://sempozyum-five.vercel.app (https://github.com/Atarapa0/sempozyumdeneme)
 
 ## Supabase ve Vercel ile Kurulum
 
@@ -207,4 +204,7 @@ npm run deploy-db
 
 - Supabase Storage kullanıyorsanız, her dosya yükleme işlemi için uygun bucket'ı oluşturmalısınız.
 - Supabase'de veritabanı şemasını güncellemek için her zaman `npm run deploy-db` komutunu kullanın.
-- Vercel'de ortam değişkenlerini güncelledikten sonra yeniden deploy yapmanız gerekebilir. 
+- Vercel'de ortam değişkenlerini güncelledikten sonra yeniden deploy yapmanız gerekebilir.
+
+
+##Projenin test için canlı web site linki: https://sempozyum-five.vercel.app 
